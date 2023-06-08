@@ -11,7 +11,7 @@ public class Application extends ResourceConfig {
 
     public Application() {
         packages("rs.raf.rafnews.factory", "rs.raf.rafnews.repository", "rs.raf.rafnews.service", "rs.raf.rafnews.resource");
-        register(CorsFilter.class);
+        register(new CorsFilter());
         register(new MyBinder());
     }
 }

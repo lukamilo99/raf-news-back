@@ -8,10 +8,7 @@ import rs.raf.rafnews.factory.Factory;
 import rs.raf.rafnews.repository.CategoryRepository;
 
 import javax.inject.Inject;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,13 +82,13 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
-    public Category insert(Category object) {
+    public int insert(Category object) {
         String query = "INSERT INTO Category (name, description) values (?, ?)";
         Connection connection = null;
         PreparedStatement statement = null;
         try {
             connection = DatabaseUtil.getConnection();
-            statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, object.getName());
             statement.setString(2, object.getDescription());
             int rowsInserted = statement.executeUpdate();
@@ -101,7 +98,12 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             } else {
                 System.out.println("Insert failed");
             }
-            return object;
+
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                return generatedKeys.getInt(1);
+            }
+            else return -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -137,7 +139,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
-    public Category update(Category object) {
+    public void update(Category object) {
         String query = "UPDATE Category SET name = ?, description = ? WHERE id = ?";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -155,36 +157,9 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             } else {
                 throw new CategoryNotFoundException("Category with id: " + object.getId() + " not found.");
             }
-            return object;
         } catch (SQLException | CategoryNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
-            DatabaseUtil.closeStatement(statement);
-            DatabaseUtil.closeConnection(connection);
-        }
-    }
-
-    @Override
-    public int count() {
-        int count = 0;
-        String query = "SELECT COUNT(*) FROM Category";
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = DatabaseUtil.getConnection();
-            statement = connection.prepareStatement(query);
-            resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                count = resultSet.getInt(1);
-            }
-
-            return count;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            DatabaseUtil.closeResultSet(resultSet);
             DatabaseUtil.closeStatement(statement);
             DatabaseUtil.closeConnection(connection);
         }

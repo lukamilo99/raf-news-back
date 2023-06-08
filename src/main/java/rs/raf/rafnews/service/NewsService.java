@@ -1,4 +1,4 @@
-package rs.raf.rafnews.repository;
+package rs.raf.rafnews.service;
 
 import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.dto.news.RequestNewsDto;
@@ -9,7 +9,7 @@ import rs.raf.rafnews.entity.News;
 
 import java.util.List;
 
-public interface NewsRepository {
+public interface NewsService {
 
     List<ResponseNewsDtoCMS> findByCategoryIdCMS(int categoryId);
     List<ResponseNewsDtoCMS> findAllCMS();
@@ -17,10 +17,7 @@ public interface NewsRepository {
     List<ResponseNewsDtoNP> findLatest();
     List<ResponseNewsDtoNP> findTrending();
     ResponseNewsFullDtoNP findCompleteNewsById(int id);
-    void incrementNewsNumberOfVisits(int id);
     void insertByDto(RequestNewsDto requestNewsDto);
-    void insertNewsTag(int newsId, int tagId);
-    void deleteNewsTag(int newsId);
     int insert(News object);
     void deleteById(int id);
     void update(RequestNewsDto object);

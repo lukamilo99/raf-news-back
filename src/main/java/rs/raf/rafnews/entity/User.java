@@ -20,17 +20,16 @@ public class User {
         this.firstname = firstName;
         this.lastname = lastName;
         this.status = true;
-        this.role = new Role();
     }
 
-    public User(int id, String username, String password, String firstName, String lastName, boolean status) {
+    public User(int id, String username, String password, String firstName, String lastName, boolean status, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.firstname = firstName;
         this.lastname = lastName;
         this.status = status;
-        this.role = new Role();
+        this.role = role;
     }
 
     public User() {

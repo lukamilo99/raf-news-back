@@ -18,9 +18,9 @@ public class CategoryResource {
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUsers() {
-        List<Category> userList = categoryService.findAll();
-        return Response.ok(userList).build();
+    public Response getAllCategory() {
+        List<Category> categoryList = categoryService.findAll();
+        return Response.ok(categoryList).build();
     }
 
     @GET
@@ -34,9 +34,9 @@ public class CategoryResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response createCategory(Category category) {
-        Category createdCategory = categoryService.insert(category);
+        categoryService.insert(category);
         return Response.status(Response.Status.CREATED)
-                .entity(createdCategory)
+                .entity("CREATED")
                 .build();
     }
 
@@ -45,8 +45,8 @@ public class CategoryResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateCategory(@PathParam("id") int id, Category updatedCategory) {
         updatedCategory.setId(id);
-        Category category = categoryService.update(updatedCategory);
-        return Response.ok(category).build();
+        categoryService.update(updatedCategory);
+        return Response.ok("UPDATED").build();
     }
 
     @DELETE

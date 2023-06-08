@@ -1,11 +1,13 @@
 package rs.raf.rafnews.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class News {
 
     private int id;
@@ -17,4 +19,12 @@ public class News {
     private User author;
     private List<Tag> tagList;
     private List<Comment> commentList;
+
+    public News(int id, String title, String content, Date creationDate, int numberOfVisits) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.creationDate = creationDate;
+        this.numberOfVisits = numberOfVisits;
+    }
 }

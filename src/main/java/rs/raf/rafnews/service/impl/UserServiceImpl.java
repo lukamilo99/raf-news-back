@@ -5,6 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import rs.raf.rafnews.database.criteria.Criteria;
+import rs.raf.rafnews.dto.user.RequestUserDto;
+import rs.raf.rafnews.dto.user.ResponseUserDto;
 import rs.raf.rafnews.entity.User;
 import rs.raf.rafnews.repository.UserRepository;
 import rs.raf.rafnews.service.UserService;
@@ -22,12 +24,12 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public User findById(int id) {
+    public ResponseUserDto findById(int id) {
         return userRepository.findById(id);
     }
 
     @Override
-    public List<User> findAll() {
+    public List<ResponseUserDto> findAll() {
         return userRepository.findAll();
     }
 
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User insert(User object) {
+    public int insert(RequestUserDto object) {
         object.setPassword(hashPassword(object.getPassword()));
         return userRepository.insert(object);
     }
@@ -53,13 +55,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(User object) {
-        return userRepository.update(object);
+    public void update(RequestUserDto object) {
+        userRepository.update(object);
     }
 
     @Override
-    public int count() {
-        return userRepository.count();
+    public void activateUserById(int id) {
+        userRepository.activateUserById(id);
+    }
+
+    @Override
+    public void deactivateUserById(int id) {
+        userRepository.deactivateUserById(id);
     }
 
     @Override
@@ -78,6 +85,7 @@ public class UserServiceImpl implements UserService {
                         .withExpiresAt(expiresAt)
                         .withSubject(user.getUsername())
                         .withClaim("role", user.getRole().getName())
+                        .withClaim("user", user.getId())
                         .sign(algorithm);
             }
             else return null;

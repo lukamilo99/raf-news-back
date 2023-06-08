@@ -1,4 +1,4 @@
-package rs.raf.rafnews.dto;
+package rs.raf.rafnews.dto.user;
 
 
 public class LoginDto {

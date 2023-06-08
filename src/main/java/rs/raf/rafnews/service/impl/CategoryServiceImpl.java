@@ -34,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category insert(Category object) {
+    public int insert(Category object) {
         return categoryRepository.insert(object);
     }
 
@@ -44,12 +44,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category update(Category object) {
-        return categoryRepository.update(object);
+    public void update(Category object) {
+        categoryRepository.update(object);
     }
 
-    @Override
-    public int count() {
-        return categoryRepository.count();
-    }
 }

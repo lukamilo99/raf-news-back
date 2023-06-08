@@ -1,7 +1,8 @@
 package rs.raf.rafnews.resource;
 
-import rs.raf.rafnews.dto.LoginDto;
-import rs.raf.rafnews.entity.User;
+import rs.raf.rafnews.dto.user.LoginDto;
+import rs.raf.rafnews.dto.user.RequestUserDto;
+import rs.raf.rafnews.dto.user.ResponseUserDto;
 import rs.raf.rafnews.service.UserService;
 
 import javax.inject.Inject;
@@ -21,10 +22,10 @@ public class UserResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUser(User user) {
-        User createdUser = userService.insert(user);
+    public Response createUser(RequestUserDto user) {
+        userService.insert(user);
         return Response.status(Response.Status.CREATED)
-                .entity(createdUser)
+                .entity("CREATED")
                 .build();
     }
 
@@ -45,7 +46,7 @@ public class UserResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
-        List<User> userList = userService.findAll();
+        List<ResponseUserDto> userList = userService.findAll();
         return Response.ok(userList).build();
     }
 
@@ -53,17 +54,33 @@ public class UserResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUserById(@PathParam("id") int id) {
-        User user = userService.findById(id);
+        ResponseUserDto user = userService.findById(id);
         return Response.ok(user).build();
     }
 
     @PUT
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(@PathParam("id") int id, User updatedUser) {
+    public Response updateUser(@PathParam("id") int id, RequestUserDto updatedUser) {
         updatedUser.setId(id);
-        User user = userService.update(updatedUser);
-        return Response.ok(user).build();
+        userService.update(updatedUser);
+        return Response.ok("UPDATED").build();
+    }
+
+    @PUT
+    @Path("/activate/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response activateUser(@PathParam("id") int id) {
+        userService.activateUserById(id);
+        return Response.ok("UPDATED").build();
+    }
+
+    @PUT
+    @Path("/deactivate/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deactivateUser(@PathParam("id") int id) {
+        userService.deactivateUserById(id);
+        return Response.ok("UPDATED").build();
     }
 
     @DELETE
