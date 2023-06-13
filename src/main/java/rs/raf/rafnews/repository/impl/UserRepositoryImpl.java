@@ -1,7 +1,6 @@
 package rs.raf.rafnews.repository.impl;
 
 import rs.raf.rafnews.database.DatabaseUtil;
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.dto.user.RequestUserDto;
 import rs.raf.rafnews.dto.user.ResponseUserDto;
 import rs.raf.rafnews.entity.Role;
@@ -83,48 +82,6 @@ public class UserRepositoryImpl implements UserRepository {
             DatabaseUtil.closeStatement(statement);
             DatabaseUtil.closeConnection(connection);
         }
-    }
-
-    @Override
-    public List<User> findAllPagination(int pageNumber, int pageSize) {
-        List<User> userList = new ArrayList<>();
-        String query = "SELECT * FROM User LIMIT ? OFFSET ?";
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = DatabaseUtil.getConnection();
-            statement = connection.prepareStatement(query);
-            int offset = (pageNumber - 1) * pageSize;
-            statement.setInt(1, pageSize);
-            statement.setInt(2, offset);
-            resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String username = resultSet.getString("username");
-                String password = resultSet.getString("password");
-                String firstname = resultSet.getString("firstname");
-                String lastname = resultSet.getString("lastname");
-                boolean status = resultSet.getBoolean("status");
-                Role role = roleRepository.findRoleById(resultSet.getInt("role_id"));
-                User user = new User(id, username, password, firstname, lastname, status , role);
-                userList.add(user);
-            }
-            return userList;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            DatabaseUtil.closeResultSet(resultSet);
-            DatabaseUtil.closeStatement(statement);
-            DatabaseUtil.closeConnection(connection);
-        }
-    }
-
-
-    @Override
-    public List<User> findByCriteria(Criteria criteria) {
-        return null;
     }
 
     @Override
@@ -269,7 +226,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findUserByUsername(String username) {
+    public User findByUsername(String username) {
         String query = "SELECT * FROM User WHERE username = ?";
         Connection connection = null;
         PreparedStatement statement = null;

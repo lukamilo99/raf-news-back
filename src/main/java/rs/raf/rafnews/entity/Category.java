@@ -16,11 +16,4 @@ public class Category {
         this.name = name;
         this.description = description;
     }
-
-    public Category(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
-
-    public Category() {}
 }

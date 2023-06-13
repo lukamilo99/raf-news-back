@@ -3,8 +3,8 @@ package rs.raf.rafnews.service.impl;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.dto.user.RequestUserDto;
 import rs.raf.rafnews.dto.user.ResponseUserDto;
 import rs.raf.rafnews.entity.User;
@@ -31,16 +31,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<ResponseUserDto> findAll() {
         return userRepository.findAll();
-    }
-
-    @Override
-    public List<User> findAllPagination(int pageNumber, int pageSize) {
-        return userRepository.findAllPagination(pageNumber, pageSize);
-    }
-
-    @Override
-    public List<User> findByCriteria(Criteria criteria) {
-        return userRepository.findByCriteria(criteria);
     }
 
     @Override
@@ -71,13 +61,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(String username, String password) {
-        User user = userRepository.findUserByUsername(username);
-
+        User user = userRepository.findByUsername(username);
         if(user != null) {
             if (hashPassword(password).equals(user.getPassword())) {
                 Date issuedAt = new Date();
                 Date expiresAt = new Date(issuedAt.getTime() + 24*60*60*1000);
-
                 Algorithm algorithm = Algorithm.HMAC256("secret");
 
                 return JWT.create()
@@ -94,13 +82,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isAuthorized(String token) {
+    public boolean isAuthorized(String token, String path) {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT jwt = verifier.verify(token);
         String username = jwt.getSubject();
-        User user = this.userRepository.findUserByUsername(username);
-        return user != null;
+        String role = jwt.getClaim("role").asString();
+
+        if(path.contains("public")) {
+            User user = this.userRepository.findByUsername(username);
+            return user != null;
+        }
+        else if(path.contains("user")) {
+            if(role.equals("ADMIN")) {
+                User user = this.userRepository.findByUsername(username);
+                return user != null;
+            }
+            else {
+                return false;
+            }
+        }
+        else return true;
     }
 
     @Override

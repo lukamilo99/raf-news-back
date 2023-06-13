@@ -6,36 +6,40 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
+import javax.ws.rs.ext.Provider;
 
+@Provider
 public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Inject
     private UserService userService;
 
     @Override
-    public void filter(ContainerRequestContext containerRequestContext) throws IOException {
+    public void filter(ContainerRequestContext containerRequestContext) {
         if (!this.isAuthRequired(containerRequestContext)) {
             return;
         }
-        try {
-            String token = containerRequestContext.getHeaderString("Authorization");
-            if(token != null && token.startsWith("Bearer ")) {
-                token = token.replace("Bearer ", "");
-            }
-
-            if (!this.userService.isAuthorized(token)) {
-                containerRequestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-        } catch (Exception exception) {
+        String token = getToken(containerRequestContext);
+        String path = containerRequestContext.getUriInfo().getPath();
+        if (!this.userService.isAuthorized(token, path)) {
             containerRequestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
 
-    private boolean isAuthRequired(ContainerRequestContext req) {
-        if (req.getUriInfo().getPath().contains("login")) {
+    private boolean isAuthRequired(ContainerRequestContext request) {
+        if (request.getUriInfo().getPath().contains("login")
+                || request.getUriInfo().getPath().contains("public")
+                || request.getRequest().getMethod().equals("OPTIONS")) {
             return false;
         }
         return true;
+    }
+
+    private String getToken(ContainerRequestContext request) {
+        String token = request.getHeaderString("Authorization");
+        if(token != null && token.startsWith("Bearer ")) {
+            return token.replace("Bearer ", "");
+        }
+        else return null;
     }
 }

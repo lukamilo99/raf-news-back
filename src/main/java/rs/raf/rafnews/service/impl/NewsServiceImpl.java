@@ -1,11 +1,8 @@
 package rs.raf.rafnews.service.impl;
 
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.dto.news.RequestNewsDto;
-import rs.raf.rafnews.dto.news.ResponseNewsDtoCMS;
-import rs.raf.rafnews.dto.news.ResponseNewsDtoNP;
-import rs.raf.rafnews.dto.news.ResponseNewsFullDtoNP;
-import rs.raf.rafnews.entity.News;
+import rs.raf.rafnews.dto.news.ResponseNewsDto;
+import rs.raf.rafnews.dto.news.ResponseNewsFullDto;
 import rs.raf.rafnews.repository.NewsRepository;
 import rs.raf.rafnews.service.NewsService;
 
@@ -18,33 +15,18 @@ public class NewsServiceImpl implements NewsService {
     private NewsRepository newsRepository;
 
     @Override
-    public List<ResponseNewsDtoCMS> findByCategoryIdCMS(int categoryId) {
-        return newsRepository.findByCategoryIdCMS(categoryId);
+    public List<ResponseNewsDto> findByCategoryId(int categoryId) {
+        return newsRepository.findByCategoryId(categoryId);
     }
 
     @Override
-    public ResponseNewsDtoCMS findByIdCMS(int id) {
-        return newsRepository.findByIdCMS(id);
+    public ResponseNewsDto findById(int id) {
+        return newsRepository.findById(id);
     }
 
     @Override
-    public List<ResponseNewsDtoCMS> findAllCMS() {
-        return newsRepository.findAllCMS();
-    }
-
-    @Override
-    public List<News> findAllPagination(int pageNumber, int pageSize) {
-        return newsRepository.findAllPagination(pageNumber, pageSize);
-    }
-
-    @Override
-    public List<News> findByCriteria(Criteria criteria) {
-        return newsRepository.findByCriteria(criteria);
-    }
-
-    @Override
-    public int insert(News object) {
-        return newsRepository.insert(object);
+    public List<ResponseNewsDto> findAll() {
+        return newsRepository.findAll();
     }
 
     @Override
@@ -58,22 +40,27 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public ResponseNewsFullDtoNP findCompleteNewsById(int id) {
-        return newsRepository.findCompleteNewsById(id);
+    public ResponseNewsFullDto findCompleteById(int id) {
+        return newsRepository.findCompleteById(id);
     }
 
     @Override
-    public List<ResponseNewsDtoNP> findTrending() {
+    public List<ResponseNewsDto> findTrending() {
         return newsRepository.findTrending();
     }
 
     @Override
-    public List<ResponseNewsDtoNP> findLatest() {
+    public List<ResponseNewsDto> findByTagId(int tagId) {
+        return newsRepository.findByTagId(tagId);
+    }
+
+    @Override
+    public List<ResponseNewsDto> findLatest() {
         return newsRepository.findLatest();
     }
 
     @Override
-    public void insertByDto(RequestNewsDto requestNewsDto) {
-        newsRepository.insertByDto(requestNewsDto);
+    public void insert(RequestNewsDto requestNewsDto) {
+        newsRepository.insert(requestNewsDto);
     }
 }

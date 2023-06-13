@@ -51,6 +51,30 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
+    public void deleteByNewsId(int newsId) {
+        String query = "DELETE FROM Comment WHERE news_id = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DatabaseUtil.getConnection();
+            statement = connection.prepareStatement(query);
+            statement.setInt(1, newsId);
+            int rowsDeleted = statement.executeUpdate();
+
+            if (rowsDeleted > 0) {
+                System.out.println("Delete successful");
+            } else {
+                System.out.println("Delete failed");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            DatabaseUtil.closeStatement(statement);
+            DatabaseUtil.closeConnection(connection);
+        }
+    }
+
+    @Override
     public void insert(RequestCommentDto requestCommentDto) {
         String query = "INSERT INTO Comment (content, creation_date, user_id, news_id) VALUES (?, ?, ?, ?)";
         Connection connection = null;

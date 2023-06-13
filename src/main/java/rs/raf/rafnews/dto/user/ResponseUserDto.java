@@ -14,7 +14,6 @@ public class ResponseUserDto {
     private boolean status;
     private int role;
 
-
     public ResponseUserDto(int id, String firstname, String lastname, String username, int role, boolean status) {
         this.id = id;
         this.firstname = firstname;

@@ -14,14 +14,6 @@ public class User {
     private boolean status;
     private Role role;
 
-    public User(String username, String password, String firstName, String lastName) {
-        this.username = username;
-        this.password = password;
-        this.firstname = firstName;
-        this.lastname = lastName;
-        this.status = true;
-    }
-
     public User(int id, String username, String password, String firstName, String lastName, boolean status, Role role) {
         this.id = id;
         this.username = username;
@@ -30,8 +22,5 @@ public class User {
         this.lastname = lastName;
         this.status = status;
         this.role = role;
-    }
-
-    public User() {
     }
 }

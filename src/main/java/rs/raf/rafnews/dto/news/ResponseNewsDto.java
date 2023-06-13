@@ -7,26 +7,21 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class ResponseNewsDtoCMS {
+public class ResponseNewsDto {
 
     private int id;
     private String title;
     private String content;
     private String author;
+    private String category;
     private Date creationDate;
 
-    public ResponseNewsDtoCMS(int id, String title, String author, Date creationDate) {
-        this.id = id;
-        this.title = title;
-        this.author = author;
-        this.creationDate = creationDate;
-    }
-
-    public ResponseNewsDtoCMS(int id, String title, String content, String author, Date creationDate) {
+    public ResponseNewsDto(int id, String title, String content, String author, String category, Date creationDate) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.author = author;
+        this.category = category;
         this.creationDate = creationDate;
     }
 }
