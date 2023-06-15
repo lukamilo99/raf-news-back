@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface CommentRepository {
 
-    List<ResponseCommentDto> findCommentsByNewsId(int newsId);
     void insert(RequestCommentDto requestCommentDto);
+    void deleteByNewsId(int newsId);
+    List<Comment> findCommentsByNewsId(int newsId);
 }

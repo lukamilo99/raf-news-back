@@ -1,13 +1,12 @@
 package rs.raf.rafnews.service.impl;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.dto.user.RequestUserDto;
 import rs.raf.rafnews.dto.user.ResponseUserDto;
+import rs.raf.rafnews.entity.Role;
 import rs.raf.rafnews.entity.User;
+import rs.raf.rafnews.repository.RoleRepository;
 import rs.raf.rafnews.repository.UserRepository;
 import rs.raf.rafnews.service.UserService;
 
@@ -15,6 +14,7 @@ import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,25 +22,33 @@ public class UserServiceImpl implements UserService {
 
     @Inject
     private UserRepository userRepository;
+    @Inject
+    private RoleRepository roleRepository;
 
     @Override
     public ResponseUserDto findById(int id) {
-        return userRepository.findById(id);
+        User user = userRepository.findById(id);
+        return new ResponseUserDto(user.getId(),
+                user.getFirstname(),
+                user.getLastname(),
+                user.getUsername(),
+                user.getRole().getId(),
+                user.isStatus());
     }
 
     @Override
     public List<ResponseUserDto> findAll() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public List<User> findAllPagination(int pageNumber, int pageSize) {
-        return userRepository.findAllPagination(pageNumber, pageSize);
-    }
-
-    @Override
-    public List<User> findByCriteria(Criteria criteria) {
-        return userRepository.findByCriteria(criteria);
+        List<ResponseUserDto> userDtoList = new ArrayList<>();
+        for (User user: userRepository.findAll()) {
+            ResponseUserDto userDto = new ResponseUserDto(user.getId(),
+                    user.getFirstname(),
+                    user.getLastname(),
+                    user.getUsername(),
+                    user.getRole().getId(),
+                    user.isStatus());
+            userDtoList.add(userDto);
+        }
+        return userDtoList;
     }
 
     @Override
@@ -71,36 +79,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(String username, String password) {
-        User user = userRepository.findUserByUsername(username);
-
-        if(user != null) {
-            if (hashPassword(password).equals(user.getPassword())) {
-                Date issuedAt = new Date();
-                Date expiresAt = new Date(issuedAt.getTime() + 24*60*60*1000);
-
-                Algorithm algorithm = Algorithm.HMAC256("secret");
-
-                return JWT.create()
-                        .withIssuedAt(issuedAt)
-                        .withExpiresAt(expiresAt)
-                        .withSubject(user.getUsername())
-                        .withClaim("role", user.getRole().getName())
-                        .withClaim("user", user.getId())
-                        .sign(algorithm);
-            }
-            else return null;
-        }
-        else return null;
-    }
-
-    @Override
-    public boolean isAuthorized(String token) {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT jwt = verifier.verify(token);
-        String username = jwt.getSubject();
-        User user = this.userRepository.findUserByUsername(username);
-        return user != null;
+        User user = userRepository.findByUsername(username);
+        Role role = roleRepository.findRoleById(user.getRole().getId());
+        if (hashPassword(password).equals(user.getPassword())) {
+            Date issuedAt = new Date();
+            Date expiresAt = new Date(issuedAt.getTime() + 24 * 60 * 60 * 1000);
+            Algorithm algorithm = Algorithm.HMAC256("secret");
+            return JWT.create()
+                    .withIssuedAt(issuedAt)
+                    .withExpiresAt(expiresAt)
+                    .withSubject(user.getUsername())
+                    .withClaim("role", role.getName())
+                    .withClaim("user", user.getId())
+                    .sign(algorithm);
+        } else return null;
     }
 
     @Override

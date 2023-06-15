@@ -1,7 +1,6 @@
 package rs.raf.rafnews.repository.impl;
 
 import rs.raf.rafnews.database.DatabaseUtil;
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.entity.Tag;
 import rs.raf.rafnews.repository.TagRepository;
 
@@ -17,16 +16,6 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Override
     public List<Tag> findAll() {
-        return null;
-    }
-
-    @Override
-    public List<Tag> findAllPagination(int pageNumber, int pageSize) {
-        return null;
-    }
-
-    @Override
-    public List<Tag> findByCriteria(Criteria criteria) {
         return null;
     }
 

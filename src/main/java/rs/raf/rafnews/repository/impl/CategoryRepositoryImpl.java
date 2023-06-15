@@ -1,21 +1,16 @@
 package rs.raf.rafnews.repository.impl;
 
+import rs.raf.rafnews.builder.impl.CategoryBuilder;
 import rs.raf.rafnews.database.DatabaseUtil;
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.entity.Category;
 import rs.raf.rafnews.exception.CategoryNotFoundException;
-import rs.raf.rafnews.factory.Factory;
 import rs.raf.rafnews.repository.CategoryRepository;
 
-import javax.inject.Inject;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryRepositoryImpl implements CategoryRepository {
-
-    @Inject
-    private Factory<Category> factory;
 
     @Override
     public Category findById(int id) {
@@ -29,10 +24,15 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             statement.setInt(1, id);
             resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
-                return factory.create(resultSet);
-            } else {
+            if (!resultSet.next()) {
                 throw new CategoryNotFoundException("Category with id: " + id + " not found.");
+            }
+            else {
+                return new CategoryBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setDescription(resultSet.getString("description"))
+                        .setName(resultSet.getString("name"))
+                        .build();
             }
         } catch (SQLException | CategoryNotFoundException e) {
             throw new RuntimeException(e);
@@ -57,7 +57,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Category category = factory.create(resultSet);
+                Category category =  new CategoryBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setDescription(resultSet.getString("description"))
+                        .setName(resultSet.getString("name"))
+                        .build();
                 categoryList.add(category);
             }
             return categoryList;
@@ -69,16 +73,6 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             DatabaseUtil.closeStatement(statement);
             DatabaseUtil.closeConnection(connection);
         }
-    }
-
-    @Override
-    public List<Category> findAllPagination(int pageNumber, int pageSize) {
-        return null;
-    }
-
-    @Override
-    public List<Category> findByCriteria(Criteria criteria) {
-        return null;
     }
 
     @Override

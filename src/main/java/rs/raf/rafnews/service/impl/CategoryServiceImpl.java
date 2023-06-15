@@ -1,6 +1,5 @@
 package rs.raf.rafnews.service.impl;
 
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.entity.Category;
 import rs.raf.rafnews.repository.CategoryRepository;
 import rs.raf.rafnews.service.CategoryService;
@@ -24,16 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> findAllPagination(int pageNumber, int pageSize) {
-        return categoryRepository.findAllPagination(pageNumber, pageSize);
-    }
-
-    @Override
-    public List<Category> findByCriteria(Criteria criteria) {
-        return categoryRepository.findByCriteria(criteria);
-    }
-
-    @Override
     public int insert(Category object) {
         return categoryRepository.insert(object);
     }
@@ -47,5 +36,4 @@ public class CategoryServiceImpl implements CategoryService {
     public void update(Category object) {
         categoryRepository.update(object);
     }
-
 }

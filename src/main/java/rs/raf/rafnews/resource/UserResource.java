@@ -22,7 +22,7 @@ public class UserResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUser(RequestUserDto user) {
+    public Response createUser(@Valid RequestUserDto user) {
         userService.insert(user);
         return Response.status(Response.Status.CREATED)
                 .entity("CREATED")
@@ -61,7 +61,7 @@ public class UserResource {
     @PUT
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(@PathParam("id") int id, RequestUserDto updatedUser) {
+    public Response updateUser(@PathParam("id") int id, @Valid RequestUserDto updatedUser) {
         updatedUser.setId(id);
         userService.update(updatedUser);
         return Response.ok("UPDATED").build();

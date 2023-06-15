@@ -1,27 +1,21 @@
 package rs.raf.rafnews.repository.impl;
 
+import rs.raf.rafnews.builder.impl.RoleBuilder;
+import rs.raf.rafnews.builder.impl.UserBuilder;
 import rs.raf.rafnews.database.DatabaseUtil;
-import rs.raf.rafnews.database.criteria.Criteria;
 import rs.raf.rafnews.dto.user.RequestUserDto;
-import rs.raf.rafnews.dto.user.ResponseUserDto;
-import rs.raf.rafnews.entity.Role;
 import rs.raf.rafnews.entity.User;
 import rs.raf.rafnews.exception.UserNotFoundException;
-import rs.raf.rafnews.repository.RoleRepository;
 import rs.raf.rafnews.repository.UserRepository;
 
-import javax.inject.Inject;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserRepositoryImpl implements UserRepository {
 
-    @Inject
-    private RoleRepository roleRepository;
-
     @Override
-    public ResponseUserDto findById(int id) {
+    public User findById(int id) {
         String query = "SELECT id, firstname, lastname, username, status, role_id FROM User WHERE id = ?";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -33,12 +27,17 @@ public class UserRepositoryImpl implements UserRepository {
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                String username = resultSet.getString("username");
-                String firstname = resultSet.getString("firstname");
-                String lastname = resultSet.getString("lastname");
-                boolean status = resultSet.getBoolean("status");
-                int roleId = resultSet.getInt("role_id");
-                return new ResponseUserDto(id, firstname, lastname, username, roleId, status);
+                return new UserBuilder()
+                        .setId(id)
+                        .setUsername(resultSet.getString("username"))
+                        .setFirstname(resultSet.getString("firstname"))
+                        .setLastName(resultSet.getString("lastname"))
+                        .setStatus(resultSet.getBoolean("status"))
+                        .setRole(new RoleBuilder()
+                                .setId(resultSet.getInt("role_id"))
+                                .build())
+                        .build();
+
             } else {
                 throw new UserNotFoundException("User with id: " + id + " not found.");
             }
@@ -53,8 +52,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<ResponseUserDto> findAll() {
-        List<ResponseUserDto> userList = new ArrayList<>();
+    public List<User> findAll() {
+        List<User> userList = new ArrayList<>();
         String query = "SELECT id, username, firstname, lastname, status, role_id FROM User";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -65,13 +64,16 @@ public class UserRepositoryImpl implements UserRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String username = resultSet.getString("username");
-                String firstname = resultSet.getString("firstname");
-                String lastname = resultSet.getString("lastname");
-                boolean status = resultSet.getBoolean("status");
-                int roleId = resultSet.getInt("role_id");
-                ResponseUserDto user = new ResponseUserDto(id, firstname, lastname, username, roleId, status);
+                User user = new UserBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setUsername(resultSet.getString("username"))
+                        .setFirstname(resultSet.getString("firstname"))
+                        .setLastName(resultSet.getString("lastname"))
+                        .setStatus(resultSet.getBoolean("status"))
+                        .setRole(new RoleBuilder()
+                                .setId(resultSet.getInt("role_id"))
+                                .build())
+                        .build();
                 userList.add(user);
             }
             return userList;
@@ -83,48 +85,6 @@ public class UserRepositoryImpl implements UserRepository {
             DatabaseUtil.closeStatement(statement);
             DatabaseUtil.closeConnection(connection);
         }
-    }
-
-    @Override
-    public List<User> findAllPagination(int pageNumber, int pageSize) {
-        List<User> userList = new ArrayList<>();
-        String query = "SELECT * FROM User LIMIT ? OFFSET ?";
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = DatabaseUtil.getConnection();
-            statement = connection.prepareStatement(query);
-            int offset = (pageNumber - 1) * pageSize;
-            statement.setInt(1, pageSize);
-            statement.setInt(2, offset);
-            resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String username = resultSet.getString("username");
-                String password = resultSet.getString("password");
-                String firstname = resultSet.getString("firstname");
-                String lastname = resultSet.getString("lastname");
-                boolean status = resultSet.getBoolean("status");
-                Role role = roleRepository.findRoleById(resultSet.getInt("role_id"));
-                User user = new User(id, username, password, firstname, lastname, status , role);
-                userList.add(user);
-            }
-            return userList;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            DatabaseUtil.closeResultSet(resultSet);
-            DatabaseUtil.closeStatement(statement);
-            DatabaseUtil.closeConnection(connection);
-        }
-    }
-
-
-    @Override
-    public List<User> findByCriteria(Criteria criteria) {
-        return null;
     }
 
     @Override
@@ -140,7 +100,7 @@ public class UserRepositoryImpl implements UserRepository {
             statement.setString(3, object.getFirstname());
             statement.setString(4, object.getLastname());
             statement.setBoolean(5, true);
-            statement.setInt(6, object.getRole());
+            statement.setInt(6, object.getRoleId());
             int rowsInserted = statement.executeUpdate();
 
             if (rowsInserted > 0) {
@@ -199,7 +159,7 @@ public class UserRepositoryImpl implements UserRepository {
             statement.setString(1, object.getUsername());
             statement.setString(2, object.getFirstname());
             statement.setString(3, object.getLastname());
-            statement.setInt(4, object.getRole());
+            statement.setInt(4, object.getRoleId());
             statement.setInt(5, object.getId());
             int rowsUpdated = statement.executeUpdate();
 
@@ -269,8 +229,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findUserByUsername(String username) {
-        String query = "SELECT * FROM User WHERE username = ?";
+    public User findByUsername(String username) {
+        String query = "SELECT id, password, role_id FROM User WHERE username = ?";
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -281,13 +241,14 @@ public class UserRepositoryImpl implements UserRepository {
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String password = resultSet.getString("password");
-                String firstname = resultSet.getString("firstname");
-                String lastname = resultSet.getString("lastname");
-                boolean status = resultSet.getBoolean("status");
-                Role role = roleRepository.findRoleById(resultSet.getInt("role_id"));
-                return new User(id, username, password, firstname, lastname, status , role);
+                return new UserBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setUsername(username)
+                        .setPassword(resultSet.getString("password"))
+                        .setRole(new RoleBuilder()
+                                .setId(resultSet.getInt("role_id"))
+                                .build())
+                        .build();
             } else {
                 throw new UserNotFoundException("User with username: " + username + " not found.");
             }

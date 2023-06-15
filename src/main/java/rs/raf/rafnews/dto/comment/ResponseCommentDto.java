@@ -1,7 +1,13 @@
 package rs.raf.rafnews.dto.comment;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.sql.Date;
 
+
+@Getter
+@Setter
 public class ResponseCommentDto {
 
     private int id;
@@ -13,38 +19,6 @@ public class ResponseCommentDto {
         this.id = id;
         this.content = content;
         this.creationDate = creationDate;
-        this.author = author;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
         this.author = author;
     }
 }

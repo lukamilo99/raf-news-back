@@ -16,7 +16,7 @@ public class CategoryResource {
     private CategoryService categoryService;
 
     @GET
-    @Path("/all")
+    @Path("/public/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCategory() {
         List<Category> categoryList = categoryService.findAll();

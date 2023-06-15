@@ -1,8 +1,10 @@
 package rs.raf.rafnews.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class Role {
 
     private int id;
@@ -11,5 +13,8 @@ public class Role {
     public Role(int id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Role() {
     }
 }

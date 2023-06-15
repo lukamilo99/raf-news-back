@@ -1,7 +1,12 @@
 package rs.raf.rafnews.dto.comment;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class RequestCommentDto {
 
+    @NotNull(message = "Content is required")
+    @NotEmpty(message = "Content is required")
     private String content;
     private int userId;
     private int newsId;

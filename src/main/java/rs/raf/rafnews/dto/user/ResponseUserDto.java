@@ -12,15 +12,14 @@ public class ResponseUserDto {
     private String lastname;
     private String username;
     private boolean status;
-    private int role;
+    private int roleId;
 
-
-    public ResponseUserDto(int id, String firstname, String lastname, String username, int role, boolean status) {
+    public ResponseUserDto(int id, String firstname, String lastname, String username, int roleId, boolean status) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
-        this.role = role;
+        this.roleId = roleId;
         this.status = status;
     }
 }

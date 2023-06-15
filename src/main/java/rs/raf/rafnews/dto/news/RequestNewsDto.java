@@ -1,16 +1,21 @@
 package rs.raf.rafnews.dto.news;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class RequestNewsDto {
 
     private int id;
+    @NotNull(message = "Title is required")
+    @NotEmpty(message = "Title is required")
     private String title;
+    @NotNull(message = "Content is required")
+    @NotEmpty(message = "Content is required")
     private String content;
     private List<String> tags;
     private int categoryId;
     private int userId;
-
 
     public int getId() {
         return id;

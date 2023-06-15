@@ -1,10 +1,12 @@
 package rs.raf.rafnews.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Date;
 
-@Data
+@Getter
+@Setter
 public class Comment {
 
     private int id;
