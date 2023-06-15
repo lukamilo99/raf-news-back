@@ -13,6 +13,7 @@ public interface NewsService {
     void update(RequestNewsDto object);
     List<ResponseNewsDto> findByCategoryId(int categoryId);
     List<ResponseNewsDto> findAll();
+    List<ResponseNewsDto> findWithPagination(int page);
     ResponseNewsDto findById(int id);
     List<ResponseNewsDto> findLatest();
     List<ResponseNewsDto> findTrending();

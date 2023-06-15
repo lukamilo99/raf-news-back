@@ -74,6 +74,14 @@ public class NewsResource {
         return Response.ok(newsList).build();
     }
 
+    @GET
+    @Path("/public/page/{page}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getWithPagination(@PathParam("page") int page) {
+        List<ResponseNewsDto> newsList = newsService.findWithPagination(page);
+        return Response.ok(newsList).build();
+    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response createNews(@Valid RequestNewsDto requestNewsDto) {

@@ -18,7 +18,7 @@ public class RequestUserDto {
     @NotNull(message = "Password is required")
     @NotEmpty(message = "Password is required")
     private String password;
-    private int role;
+    private int roleId;
 
     public int getId() {
         return id;
@@ -60,11 +60,11 @@ public class RequestUserDto {
         this.password = password;
     }
 
-    public int getRole() {
-        return role;
+    public int getRoleId() {
+        return roleId;
     }
 
-    public void setRole(int role) {
-        this.role = role;
+    public void setRoleId(int roleId) {
+        this.roleId = roleId;
     }
 }

@@ -1,7 +1,6 @@
 package rs.raf.rafnews.configuration;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import rs.raf.rafnews.mapper.NewsMapper;
 import rs.raf.rafnews.repository.*;
 import rs.raf.rafnews.repository.impl.*;
 import rs.raf.rafnews.service.CategoryService;
@@ -31,7 +30,5 @@ public class MyBinder extends AbstractBinder {
         bind(CategoryServiceImpl.class).to(CategoryService.class).in(Singleton.class);
         bind(NewsServiceImpl.class).to(NewsService.class).in(Singleton.class);
         bind(CommentServiceImpl.class).to(CommentService.class).in(Singleton.class);
-        //mapper
-        bind(NewsMapper.class).to(NewsMapper.class).in(Singleton.class);
     }
 }

@@ -27,4 +27,8 @@ public class News {
         this.creationDate = creationDate;
         this.numberOfVisits = numberOfVisits;
     }
+
+    public News() {
+
+    }
 }

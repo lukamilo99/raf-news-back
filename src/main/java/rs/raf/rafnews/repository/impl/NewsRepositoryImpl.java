@@ -1,14 +1,13 @@
 package rs.raf.rafnews.repository.impl;
 
+import rs.raf.rafnews.builder.impl.CategoryBuilder;
+import rs.raf.rafnews.builder.impl.NewsBuilder;
+import rs.raf.rafnews.builder.impl.UserBuilder;
 import rs.raf.rafnews.database.DatabaseUtil;
-import rs.raf.rafnews.dto.comment.ResponseCommentDto;
 import rs.raf.rafnews.dto.news.RequestNewsDto;
-import rs.raf.rafnews.dto.news.ResponseNewsDto;
-import rs.raf.rafnews.dto.news.ResponseNewsFullDto;
-import rs.raf.rafnews.dto.user.ResponseUserDto;
+import rs.raf.rafnews.entity.News;
 import rs.raf.rafnews.entity.Tag;
 import rs.raf.rafnews.exception.NewsNotFoundException;
-import rs.raf.rafnews.mapper.NewsMapper;
 import rs.raf.rafnews.repository.*;
 
 import javax.inject.Inject;
@@ -21,16 +20,10 @@ public class NewsRepositoryImpl implements NewsRepository {
     @Inject
     private TagRepository tagRepository;
     @Inject
-    private UserRepository userRepository;
-    @Inject
-    private CategoryRepository categoryRepository;
-    @Inject
     private CommentRepository commentRepository;
-    @Inject
-    private NewsMapper newsMapper;
 
     @Override
-    public ResponseNewsDto findById(int id) {
+    public News findById(int id) {
         String query = "SELECT id, title, content, creation_date, category_id, user_id FROM News WHERE id = ?";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -44,10 +37,18 @@ public class NewsRepositoryImpl implements NewsRepository {
             if (!resultSet.next()) {
                 throw new NewsNotFoundException("News with id: " + id + " not found.");
             } else {
-                String category = categoryRepository.findById(resultSet.getInt("category_id")).getName();
-                ResponseUserDto user = userRepository.findById(resultSet.getInt("user_id"));
-                String author = user.getFirstname() + " " + user.getLastname();
-                return newsMapper.mapToResponseNewsDto(resultSet, category, author);
+                return new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .build();
             }
         } catch (SQLException | NewsNotFoundException e) {
             throw new RuntimeException(e);
@@ -59,8 +60,8 @@ public class NewsRepositoryImpl implements NewsRepository {
     }
 
     @Override
-    public List<ResponseNewsDto> findAll() {
-        List<ResponseNewsDto> newsList = new ArrayList<>();
+    public List<News> findAll() {
+        List<News> newsList = new ArrayList<>();
         String query = "SELECT id, title, CONCAT(SUBSTRING(content, 1, 30), '...') AS content, creation_date, category_id, user_id FROM News";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -71,10 +72,19 @@ public class NewsRepositoryImpl implements NewsRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                String category = categoryRepository.findById(resultSet.getInt("category_id")).getName();
-                ResponseUserDto user = userRepository.findById(resultSet.getInt("user_id"));
-                String author = user.getFirstname() + " " + user.getLastname();
-                newsList.add(newsMapper.mapToResponseNewsDto(resultSet, category, author));
+                News news = new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .build();
+                newsList.add(news);
             }
             return newsList;
         } catch (SQLException e) {
@@ -87,8 +97,46 @@ public class NewsRepositoryImpl implements NewsRepository {
     }
 
     @Override
-    public List<ResponseNewsDto> findLatest() {
-        List<ResponseNewsDto> newsList = new ArrayList<>();
+    public List<News> findWithPagination(int page) {
+        List<News> newsList = new ArrayList<>();
+        String query = "SELECT id, title, CONCAT(SUBSTRING(content, 1, 30), '...') AS content, creation_date, category_id, user_id FROM News LIMIT 6 OFFSET ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = DatabaseUtil.getConnection();
+            statement = connection.prepareStatement(query);
+            statement.setInt(1, (page - 1) * 6);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                News news = new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .build();
+                newsList.add(news);
+            }
+            return newsList;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            DatabaseUtil.closeResultSet(resultSet);
+            DatabaseUtil.closeStatement(statement);
+            DatabaseUtil.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public List<News> findLatest() {
+        List<News> newsList = new ArrayList<>();
         String query = "SELECT id, title, CONCAT(SUBSTRING(content, 1, 30), '...') AS content, creation_date, category_id, user_id FROM News ORDER BY creation_date ASC LIMIT 10";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -99,10 +147,19 @@ public class NewsRepositoryImpl implements NewsRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                String category = categoryRepository.findById(resultSet.getInt("category_id")).getName();
-                ResponseUserDto user = userRepository.findById(resultSet.getInt("user_id"));
-                String author = user.getFirstname() + " " + user.getLastname();
-                newsList.add(newsMapper.mapToResponseNewsDto(resultSet, category, author));
+                News news = new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .build();
+                newsList.add(news);
             }
             return newsList;
         } catch (SQLException e) {
@@ -115,12 +172,11 @@ public class NewsRepositoryImpl implements NewsRepository {
     }
 
     @Override
-    public ResponseNewsFullDto findCompleteById(int id) {
+    public News findCompleteById(int id) {
         String query = "SELECT * FROM News WHERE id = ?";
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-
         try {
             connection = DatabaseUtil.getConnection();
             statement = connection.prepareStatement(query);
@@ -131,22 +187,25 @@ public class NewsRepositoryImpl implements NewsRepository {
                 throw new NewsNotFoundException("News with id: " + id + " not found.");
             }
             else {
-                String title = resultSet.getString("title");
-                String content = resultSet.getString("content");
-                int userId = resultSet.getInt("user_id");
-                ResponseUserDto userDto = userRepository.findById(userId);
-                String author = userDto.getFirstname() + " " + userDto.getLastname();
-                Date creationDate = resultSet.getDate("creation_date");
-                int categoryId = resultSet.getInt("category_id");
-                String category = categoryRepository.findById(categoryId).getName();
-                List<Tag> tags = findTagsByNewsId(id);
-                List<ResponseCommentDto> comments = commentRepository.findCommentsByNewsId(id);
-                incrementNewsNumberOfVisits(id);
-                return new ResponseNewsFullDto(id, title, content, author, category, creationDate, tags, comments);
+                return new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .setTagList(findTagsByNewsId(id))
+                        .setCommentList(new ArrayList<>())
+                        .build();
             }
         } catch (SQLException | NewsNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
+            incrementNewsNumberOfVisits(id);
             DatabaseUtil.closeResultSet(resultSet);
             DatabaseUtil.closeStatement(statement);
             DatabaseUtil.closeConnection(connection);
@@ -178,8 +237,8 @@ public class NewsRepositoryImpl implements NewsRepository {
     }
 
     @Override
-    public List<ResponseNewsDto> findTrending() {
-        List<ResponseNewsDto> newsList = new ArrayList<>();
+    public List<News> findTrending() {
+        List<News> newsList = new ArrayList<>();
         String query = "SELECT id, title, CONCAT(SUBSTRING(content, 1, 30), '...') AS content, creation_date, category_id, user_id FROM News ORDER BY number_of_visits DESC LIMIT 10";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -190,10 +249,19 @@ public class NewsRepositoryImpl implements NewsRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                String category = categoryRepository.findById(resultSet.getInt("category_id")).getName();
-                ResponseUserDto user = userRepository.findById(resultSet.getInt("user_id"));
-                String author = user.getFirstname() + " " + user.getLastname();
-                newsList.add(newsMapper.mapToResponseNewsDto(resultSet, category, author));
+                News news = new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .build();
+                newsList.add(news);
             }
             return newsList;
         } catch (SQLException e) {
@@ -206,8 +274,8 @@ public class NewsRepositoryImpl implements NewsRepository {
     }
 
     @Override
-    public List<ResponseNewsDto> findByTagId(int tagId) {
-        List<ResponseNewsDto> newsList = new ArrayList<>();
+    public List<News> findByTagId(int tagId) {
+        List<News> newsList = new ArrayList<>();
         String query = "SELECT id, title, CONCAT(SUBSTRING(content, 1, 30), '...') AS content, creation_date, category_id, user_id FROM News INNER JOIN News_tag ON News.id = News_tag.news_id WHERE News_tag.tag_id = ?";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -219,10 +287,19 @@ public class NewsRepositoryImpl implements NewsRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                String category = categoryRepository.findById(resultSet.getInt("category_id")).getName();
-                ResponseUserDto user = userRepository.findById(resultSet.getInt("user_id"));
-                String author = user.getFirstname() + " " + user.getLastname();
-                newsList.add(newsMapper.mapToResponseNewsDto(resultSet, category, author));
+                News news = new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .build();
+                newsList.add(news);
             }
             return newsList;
         } catch (SQLException e) {
@@ -379,8 +456,8 @@ public class NewsRepositoryImpl implements NewsRepository {
     }
 
     @Override
-    public List<ResponseNewsDto> findByCategoryId(int categoryId) {
-        List<ResponseNewsDto> newsList = new ArrayList<>();
+    public List<News> findByCategoryId(int categoryId) {
+        List<News> newsList = new ArrayList<>();
         String query = "SELECT id, title, CONCAT(SUBSTRING(content, 1, 30), '...') AS content, creation_date, category_id, user_id FROM News WHERE category_id = ?";
         Connection connection = null;
         PreparedStatement statement = null;
@@ -392,15 +469,19 @@ public class NewsRepositoryImpl implements NewsRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String title = resultSet.getString("title");
-                String content = resultSet.getString("content");
-                Date creationDate = resultSet.getDate("creation_date");
-                String category = categoryRepository.findById(categoryId).getName();
-                ResponseUserDto user = userRepository.findById(resultSet.getInt("user_id"));
-                String author = user.getFirstname() + " " + user.getLastname();
-                ResponseNewsDto newsDto = new ResponseNewsDto(id, title, content, author, category, creationDate);
-                newsList.add(newsDto);
+                News news = new NewsBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setTitle(resultSet.getString("title"))
+                        .setContent(resultSet.getString("content"))
+                        .setCreationDate(resultSet.getDate("creation_date"))
+                        .setCategory(new CategoryBuilder()
+                                .setId(resultSet.getInt("category_id"))
+                                .build())
+                        .setAuthor(new UserBuilder()
+                                .setId(resultSet.getInt("user_id"))
+                                .build())
+                        .build();
+                newsList.add(news);
             }
             return newsList;
         } catch (SQLException e) {

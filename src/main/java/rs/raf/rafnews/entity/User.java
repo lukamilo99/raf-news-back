@@ -23,4 +23,7 @@ public class User {
         this.status = status;
         this.role = role;
     }
+
+    public User() {
+    }
 }

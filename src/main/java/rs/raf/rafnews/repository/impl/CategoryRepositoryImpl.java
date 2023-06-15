@@ -1,5 +1,6 @@
 package rs.raf.rafnews.repository.impl;
 
+import rs.raf.rafnews.builder.impl.CategoryBuilder;
 import rs.raf.rafnews.database.DatabaseUtil;
 import rs.raf.rafnews.entity.Category;
 import rs.raf.rafnews.exception.CategoryNotFoundException;
@@ -27,10 +28,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                 throw new CategoryNotFoundException("Category with id: " + id + " not found.");
             }
             else {
-                int categoryId = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-                String description = resultSet.getString("description");
-                return new Category(categoryId, name, description);
+                return new CategoryBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setDescription(resultSet.getString("description"))
+                        .setName(resultSet.getString("name"))
+                        .build();
             }
         } catch (SQLException | CategoryNotFoundException e) {
             throw new RuntimeException(e);
@@ -55,10 +57,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-                String description = resultSet.getString("description");
-                Category category = new Category(id, name, description);
+                Category category =  new CategoryBuilder()
+                        .setId(resultSet.getInt("id"))
+                        .setDescription(resultSet.getString("description"))
+                        .setName(resultSet.getString("name"))
+                        .build();
                 categoryList.add(category);
             }
             return categoryList;

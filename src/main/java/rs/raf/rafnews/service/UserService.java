@@ -16,6 +16,5 @@ public interface UserService {
     void activateUserById(int id);
     void deactivateUserById(int id);
     String login(String username, String password);
-    boolean isAuthorized(String token, String path);
     String hashPassword(String password);
 }
